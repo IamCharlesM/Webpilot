@@ -1,36 +1,3 @@
-<script setup>
-import {onMounted, ref} from 'vue'
-
-import IconOpenAi from '@/components/icon/IconOpenAi.vue'
-import HelpTips from '@/components/HelpTips.vue'
-
-const props = defineProps({
-  modelValue: {
-    type: Object,
-    required: true,
-  },
-})
-
-const emits = defineEmits(['update:modelValue', 'change'])
-
-const authKey = ref(props.modelValue.authKey)
-const isSelfHost = ref(false)
-const selfHostUrl = ref(props.modelValue.selfHostUrl)
-
-onMounted(() => {
-  if (props.modelValue.selfHostUrl !== '') {
-    isSelfHost.value = true
-  }
-})
-
-const onChange = () => {
-  emits('update:modelValue', {
-    authKey: authKey.value,
-    selfHostUrl: selfHostUrl.value,
-  })
-}
-</script>
-
 <template>
   <div :class="stepTwo.wrap">
     <div :class="stepTwo.header">
@@ -65,6 +32,39 @@ const onChange = () => {
     </template>
   </div>
 </template>
+
+<script setup>
+import {onMounted, ref} from 'vue'
+
+import IconOpenAi from '@/components/icon/IconOpenAi.vue'
+import HelpTips from '@/components/HelpTips.vue'
+
+const props = defineProps({
+  modelValue: {
+    type: Object,
+    required: true,
+  },
+})
+
+const emits = defineEmits(['update:modelValue', 'change'])
+
+const authKey = ref(props.modelValue.authKey)
+const isSelfHost = ref(false)
+const selfHostUrl = ref(props.modelValue.selfHostUrl)
+
+onMounted(() => {
+  if (props.modelValue.selfHostUrl !== '') {
+    isSelfHost.value = true
+  }
+})
+
+const onChange = () => {
+  emits('update:modelValue', {
+    authKey: authKey.value,
+    selfHostUrl: selfHostUrl.value,
+  })
+}
+</script>
 
 <style module="stepTwo" lang="scss">
 .wrap {
