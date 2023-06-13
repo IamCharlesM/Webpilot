@@ -2,73 +2,95 @@
   <div :class="advanced.main">
     <div :class="[advanced.api, advanced.panel]">
       <span :class="advanced.title">{{ $gettext('API Settings') }}</span>
-      <div :class="advanced.apiItem">
-        <label :class="[advanced.subtitle, advanced.apiProvider]" for="provider">{{
-          $gettext('Active API Provider')
-        }}</label>
-        <select id="provider" v-model="llmModel" name="provider">
-          <option :class="advanced.iconLogo" selected value="gpt-3.5-turbo">
-            {{ $gettext('OpenAI gpt-3.5-turbo') }}
-          </option>
-          <option value="gpt-4">{{ $gettext('OpenAI gpt-4') }}</option>
-          <!-- <option value="baidu_wenxin">百度文心</option> -->
-        </select>
-        <img alt="" :class="advanced.dropdown" src="./images/dropdown.png" @click="openSelect" />
+      <!-- <div v-if="isSignedIn === true" :class="advanced.general"> -->
+      <div v-if="false" :class="advanced.general">
+        <div :class="advanced.radio">
+          <input
+            id="option1"
+            v-model="selectedOption"
+            name="option"
+            type="radio"
+            value="general"
+            @change="handleOptionChange"
+          />
+          <label for="option1">Use Free OpenAI GPT API from Webpilot</label>
+        </div>
+        <div v-if="selectedOption === 'general'">
+          <h4>Your Usage</h4>
+          <p>{{ usage.current }} / {{ usage.total }}</p>
+        </div>
       </div>
-      <div :class="advanced.apiItem">
-        <label :class="advanced.subtitle" for="keys" style="margin-top: 20px">{{
-          $gettext('Your API Key')
-        }}</label>
-        <input
-          id="keys"
-          v-model="authKey"
-          :class="{[advanced.haveAuthKey]: store.config.authKey !== ''}"
-          name="keys"
-          :placeholder="authKeyPlaceHolder"
-          role="authkey"
-          type="text"
-          @blur="onBlurSetAuthkey"
-          @focus="onEditAuthKey"
-        />
-        <WebpilotAlert
-          v-if="(error || success) && !isSelfHost"
-          :auto-hide="true"
-          style="margin-top: 8px"
-          :tips="alertInfo.tips"
-          :type="alertInfo.type"
-          @on-hide="hideAlert"
-        />
-
-        <span :class="advanced.links">
-          {{ $gettext('Visit') }}: <a :href="links" target="_blank">{{ links }}</a>
-        </span>
-        <div :class="advanced.host">
-          <div :class="advanced.selfHost">
+      <div :class="advanced.personal">
+        <div :class="advanced.radio">
+          <input
+            id="option2"
+            v-model="selectedOption"
+            name="option"
+            type="radio"
+            value="personal"
+            @change="handleOptionChange"
+          />
+          <label for="option2">Set up your OpenAI API</label>
+        </div>
+        <div v-if="selectedOption === 'personal'">
+          <div :class="advanced.apiItem">
             <input
-              id="self_host"
-              v-model="isSelfHost"
-              name="self_host"
-              type="checkbox"
-              @change="chekcCloseSelfHost"
+              id="keys"
+              v-model="authKey"
+              :class="{[advanced.haveAuthKey]: store.config.authKey !== ''}"
+              name="keys"
+              :placeholder="authKeyPlaceHolder"
+              role="authkey"
+              type="text"
+              @blur="onBlurSetAuthkey"
+              @focus="onEditAuthKey"
             />
-            <label for="self_host">Self Host</label>
+            <WebpilotAlert
+              v-if="(error || success) && !isSelfHost"
+              :auto-hide="true"
+              style="margin-top: 8px"
+              :tips="alertInfo.tips"
+              :type="alertInfo.type"
+              @on-hide="hideAlert"
+            />
+            <div :class="advanced.apiKeyGuide">
+              <p>
+                To get your API key, log into
+                <a href="https://platform.openai.com/account/api-keys" target="_blank">
+                  Open AI > API Keys</a
+                >
+              </p>
+              <p>Click <b>“Create new secret key”</b>. Copy and paste key above</p>
+            </div>
+
+            <div :class="advanced.host">
+              <div :class="advanced.selfHost">
+                <input
+                  id="self_host"
+                  v-model="isSelfHost"
+                  name="self_host"
+                  type="checkbox"
+                  @change="chekcCloseSelfHost"
+                />
+                <label for="self_host">Self Host</label>
+              </div>
+            </div>
+            <div v-if="isSelfHost" :class="advanced.selfHostInput">
+              <input
+                v-model="selfHostUrl"
+                placeholder="Enter your base address"
+                @change="onChangeHostUrl"
+              />
+              <WebpilotAlert
+                v-if="(error || success) && isSelfHost"
+                style="margin-top: 8px"
+                :tips="alertInfo.tips"
+                :type="alertInfo.type"
+              />
+            </div>
           </div>
         </div>
-        <div v-if="isSelfHost" :class="advanced.selfHostInput">
-          <input
-            v-model="selfHostUrl"
-            placeholder="Enter your base address"
-            @change="onChangeHostUrl"
-          />
-          <WebpilotAlert
-            v-if="(error || success) && isSelfHost"
-            style="margin-top: 8px"
-            :tips="alertInfo.tips"
-            :type="alertInfo.type"
-          />
-        </div>
       </div>
-
       <WebpilotButton
         :auto-hide="true"
         :loading="loading"
@@ -81,8 +103,10 @@
 
     <div :class="[advanced.extension, advanced.panel]">
       <span :class="advanced.title">{{ $gettext('Extension Settings') }}</span>
-      <span :class="[advanced.subtitle, advanced.displayMode]">{{ $gettext('Display Mode') }}</span>
-      <div :class="advanced.mode">
+      <span v-if="false" :class="[advanced.subtitle, advanced.displayMode]">{{
+        $gettext('Display Mode')
+      }}</span>
+      <div v-if="false" :class="advanced.mode">
         <!-- Sider bar under development -->
         <div v-if="false" :class="advanced.radioGroup">
           <input
@@ -140,18 +164,22 @@ import {computed, ref} from 'vue'
 import {storeToRefs} from 'pinia'
 
 import useStore from '@/stores/store'
+import useUserStore from '@/stores/user'
 import useAskAi from '@/hooks/useAskAi'
 import WebpilotAlert from '@/components/WebpilotAlert.vue'
 import WebpilotButton from '@/components/WebpilotButton.vue'
 import ShortcutInput from '@/components/ShortcutInput.vue'
 
 import {$gettext} from '@/utils/i18n'
+import {WEBPILOT_OPENAI} from '@/config'
 
 import WebpilotLogo from '../../assets/icon.png'
 
 import SwitchButton from './components/SwitchButton.vue'
 
-const links = ref('https://platform.openai.com/account/api-keys')
+const userStore = useUserStore()
+const {usage} = storeToRefs(userStore)
+const {getUsage} = userStore
 
 const store = useStore()
 
@@ -159,37 +187,46 @@ const {loading, success, error, askAi} = useAskAi()
 
 const {config} = storeToRefs(store)
 
+const selectedOption = ref('personal')
+
 const saveAuthKey = ref(config.value.authKey)
+
 /** Edit Auth Key */
 const authKey = ref('')
-const authKeyPlaceHolder = computed(() => {
+const authKeyPlaceHolder = ref('Enter your API Key from OpenAI')
+
+const updatePlaceHolder = () => {
   const key = saveAuthKey.value === '' ? store.config.authKey : saveAuthKey.value
 
   if (key === '' || !key) return 'Enter your API Key from OpenAI'
 
   const startText = key.substring(0, 3)
   const endText = key.substring(key.length - 4, key.length)
+  authKeyPlaceHolder.value = `${startText}...${endText}`
   return `${startText}...${endText}`
-})
+}
+updatePlaceHolder()
 
 const onEditAuthKey = () => {
   // use saved temp key first
-  if (saveAuthKey.value !== '') {
-    authKey.value = saveAuthKey.value
-    return
-  }
-
-  // if cna't find local save auhtkey use storeconfig authkey
-  const {authKey: key} = config.value
-  if (key === '' || !key) return
-  saveAuthKey.value = key
-  authKey.value = key
+  // if (saveAuthKey.value !== '') {
+  //   authKey.value = saveAuthKey.value
+  //   return
+  // }
+  // // if can't find local save auhtkey use storeconfig authkey
+  // const {authKey: key} = config.value
+  // if (key === '' || !key) return
+  // saveAuthKey.value = key
+  authKeyPlaceHolder.value = ''
 }
 
 const onBlurSetAuthkey = () => {
-  saveAuthKey.value = authKey.value
+  if (authKey.value !== '') {
+    saveAuthKey.value = authKey.value
+  }
 
-  if (authKey.value !== '') authKey.value = ''
+  authKey.value = ''
+  updatePlaceHolder()
 }
 
 const alertInfo = computed(() => {
@@ -216,6 +253,29 @@ const llmModel = ref(config.value.model.model)
 const isSelfHost = ref(!!config.value.selfHostUrl)
 const selfHostUrl = ref(config.value.selfHostUrl)
 
+const currentAuthKey = ref(config.value.authKey)
+const currentHostUrl = ref(config.value.selfHostUrl)
+
+const handleOptionChange = event => {
+  const {value} = event.target
+
+  selectedOption.value = value
+
+  switch (value) {
+    case 'general':
+      currentAuthKey.value = WEBPILOT_OPENAI.AUTH_KEY
+      currentHostUrl.value = WEBPILOT_OPENAI.HOST_URL
+      llmModel.value = WEBPILOT_OPENAI.MODEL
+      getUsage()
+      break
+    default:
+      currentAuthKey.value = saveAuthKey.value
+      currentHostUrl.value = selfHostUrl.value
+      llmModel.value = 'gpt-3.5-turbo'
+      break
+  }
+}
+
 const save = async () => {
   store.setConfig({
     ...store.config,
@@ -226,21 +286,23 @@ const save = async () => {
   })
 
   if (
-    saveAuthKey.value === store.config.authKey &&
-    selfHostUrl.value === store.config.selfHostUrl
+    selectedOption.value === store.config.apiOrigin &&
+    currentAuthKey.value === store.config.authKey &&
+    currentHostUrl.value === store.config.selfHostUrl
   ) {
     return
   }
 
   // Check Toekn validation
   await askAi({
-    authKey: saveAuthKey.value,
+    authKey: currentAuthKey.value,
     command: 'Say hi.',
-    url: selfHostUrl.value,
+    url: currentHostUrl.value,
   })
 
   store.setConfig({
     ...store.config,
+    apiOrigin: selectedOption.value,
     isAuth: true,
     authKey: saveAuthKey.value,
     isFinishSetup: true,
@@ -282,21 +344,10 @@ const hideAlert = () => {
 </script>
 
 <style module="advanced" lang="scss">
-.openAiLogo {
-  width: 22px;
-  height: 22px;
-}
-
-.main {
-  padding: 24px 0;
-  padding-top: 15px;
-  font-family: 'PingFang SC', Helvetica, Arial, sans-serif;
-}
-
 .panel {
   display: flex;
   flex-direction: column;
-  padding: 24px 16px;
+  padding: 16px 24px;
   background-color: white;
   border-radius: 10px;
 
@@ -312,7 +363,7 @@ const hideAlert = () => {
   }
 
   .subtitle {
-    margin-top: 24px;
+    margin-top: 36px;
     color: #292929;
     font-weight: 400;
     font-size: 18px;
@@ -332,7 +383,9 @@ const hideAlert = () => {
     width: 360px;
     height: 36px;
     margin-top: 8px;
+    margin-bottom: 12px;
     padding-left: 8px;
+    color: #929497;
     font-size: 14px;
     line-height: 20px;
     border: 1px solid #dcdee1;
@@ -365,13 +418,45 @@ const hideAlert = () => {
     font-size: 14px;
     line-height: 20px;
   }
+
+  p {
+    margin: 0;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 18px;
+  }
 }
 
 .api {
+  min-height: 430px;
+}
+
+.general {
+  h4 {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+
+.radio {
   display: flex;
-  flex-direction: column;
-  height: 426px;
-  padding: 16px 24px;
+  align-items: center;
+  margin: 16px 0 12px;
+  line-height: 25px;
+
+  input {
+    width: 16px;
+    height: 16px;
+    margin: 0 8px 0 0;
+    border: 1px solid #4f5aff;
+    cursor: pointer;
+  }
+
+  label {
+    font-size: 18px;
+    cursor: pointer;
+  }
 }
 
 .apiItem {
@@ -388,7 +473,7 @@ const hideAlert = () => {
   flex-direction: row;
   justify-content: space-between;
   width: 360px;
-  margin-top: 8px;
+  margin-top: 16px;
 }
 
 .selfHost {
@@ -429,39 +514,6 @@ const hideAlert = () => {
     border: 1px solid #dcdee1;
     border-radius: 5px;
   }
-}
-
-.more {
-  /* identical to box height */
-  display: inline;
-  color: #585b58;
-  font-size: 14px;
-  line-height: 20px;
-  text-align: right;
-  text-decoration-line: underline;
-
-  .question_mark {
-    display: inline;
-    width: 16px;
-    height: 16px;
-    margin-right: 6px;
-    vertical-align: middle;
-  }
-}
-
-.saveButton {
-  width: 143px;
-  margin-top: auto;
-  padding: 8px 16px;
-  color: white;
-  font-weight: 500;
-  font-size: 14px;
-  font-family: 'PingFang SC', Helvetica, Arial, sans-serif;
-  line-height: 20px;
-  background-color: #929497;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .mode {
@@ -507,7 +559,8 @@ const hideAlert = () => {
   margin-top: 9px;
 
   div {
-    display: inline;
+    display: flex;
+    align-items: center;
     padding-left: 6px;
     color: #585b58;
     font-weight: 400;
@@ -519,7 +572,7 @@ const hideAlert = () => {
     display: inline-block;
     width: 16px;
     height: 16px;
-    margin: 0 4px;
+    margin: 0 5px;
   }
 }
 
