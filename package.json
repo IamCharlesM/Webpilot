@@ -7,8 +7,8 @@
   "packageManager": "pnpm@8.2.0",
   "scripts": {
     "prepare": "husky install",
-    "dev": "plasmo dev",
-    "build": "plasmo build",
+    "dev": "node api.js && plasmo dev",
+    "build": "node api.js && plasmo build",
     "package": "plasmo package",
     "lint": "pnpm lint:eslint && pnpm lint:stylelint && pnpm lint:prettier",
     "lint:eslint": "eslint './**/*.{vue,ts,tsx,js}' --cache --fix",
