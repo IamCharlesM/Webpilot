@@ -19,6 +19,7 @@ yarn.lock
 .DS_Store
 *.pem
 *.po
+temp_auto_push.bat
 
 # debug
 npm-debug.log*
@@ -41,4 +42,5 @@ keys.json
 
 # typescript
 .tsbuildinfo
+.gitignore
 branch_structure.json
