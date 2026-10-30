@@ -19,7 +19,6 @@ yarn.lock
 .DS_Store
 *.pem
 *.po
-temp_auto_push.bat
 
 # debug
 npm-debug.log*
@@ -28,7 +27,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # local env files
-.env*
 
 out/
 build/
@@ -42,5 +40,4 @@ keys.json
 
 # typescript
 .tsbuildinfo
-.gitignore
-branch_structure.json
+config.bat
